@@ -111,7 +111,6 @@ public class TopologicalSorter {
         verticesByDependencyCountList.sort(TopologicalSorter::sortVerticesByDependancyCount);
         LinkedHashSet<Vertex<T>> verticesByDependencyCount = new LinkedHashSet<>(verticesByDependencyCountList);
 
-        verticesByDependencyCount.addAll(toSort);
         // Note: LinkedHashSet is used to preserve insertion order
         List<List<T>> sorted = new ArrayList<>(toSort.size());
 
