@@ -59,7 +59,8 @@ public class SliceTarget implements Target {
     public boolean overlaps(Target other) {
         if (other instanceof NodeTarget) {
             return false;
-        } else if (other instanceof SliceTarget sliceTarget) {
+        } else if (other instanceof SliceTarget) {
+            SliceTarget sliceTarget = (SliceTarget) other;
             if (!this.path.equals(sliceTarget.path)) {
                 return false;
             }
@@ -92,5 +93,18 @@ public class SliceTarget implements Target {
         } else {
             throw new UnsupportedOperationException("Invalid slice into non-list");
         }
+    }
+
+    @Override
+    public Target span(Target other) {
+        if (other instanceof SliceTarget) {
+            SliceTarget slice = (SliceTarget) other;
+            if (slice.path.equals(this.path)) {
+                int minStart = Math.min(this.startIndex, slice.startIndex);
+                int maxEnd = Math.max(this.endIndex, slice.endIndex);
+                return new SliceTarget(this.path, minStart, maxEnd);
+            }
+        }
+        return new NodeTarget(this.getPath().commonPrefix(other.getPath()));
     }
 }

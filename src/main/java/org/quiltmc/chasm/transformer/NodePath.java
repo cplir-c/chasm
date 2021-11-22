@@ -19,6 +19,10 @@ public class NodePath {
         this.entries = entries;
     }
 
+    public static NodePath fromList(List<Object> entries) {
+        return new NodePath(new ArrayList<Object>(entries));
+    }
+
     private NodePath append(Object entry) {
         List<Object> newIndices = new ArrayList<>(entries);
         newIndices.add(entry);
@@ -82,6 +86,20 @@ public class NodePath {
         }
 
         return current;
+    }
+
+    public NodePath commonPrefix(NodePath other) {
+        int minLength = Math.min(this.getLength(), other.getLength());
+        List<Object> commonPath = new ArrayList<Object>();
+
+        for (int i = 0; i < minLength; ++i) {
+            Object a = this.getEntryAt(i);
+            Object b = other.getEntryAt(i);
+            if (a == b || a.equals(b)) {
+                commonPath.add(a);
+            }
+        }
+        return new NodePath(commonPath);
     }
 
     @Override

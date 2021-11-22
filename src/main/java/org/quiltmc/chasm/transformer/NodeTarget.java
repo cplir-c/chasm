@@ -33,4 +33,9 @@ public class NodeTarget implements Target {
     public Node resolve(Node root) {
         return path.resolve(root);
     }
+
+    @Override
+    public Target span(Target other) {
+        return new NodeTarget(this.getPath().commonPrefix(other.getPath()));
+    }
 }

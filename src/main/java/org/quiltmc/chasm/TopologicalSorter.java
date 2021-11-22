@@ -1,17 +1,14 @@
 package org.quiltmc.chasm;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import org.quiltmc.chasm.transformer.Target;
 import org.quiltmc.chasm.transformer.Transformation;
 import org.quiltmc.chasm.transformer.Transformer;
@@ -97,10 +94,20 @@ public class TopologicalSorter {
             toSort.add(new Vertex<>(t));
         }
 
+        Map<T, Vertex<T>> tToVertexMap = new IdentityHashMap<>(list.size());
+        for (Vertex<T> vertex : toSort) {
+            tToVertexMap.put(vertex.getValue(), vertex);
+        }
+        Set<T> allT = tToVertexMap.keySet();
+
         // Determine dependencies
         for (Vertex<T> first : toSort) {
-            for (Vertex<T> second : toSort) {
-                Dependency dependency = dependencyProvider.get(first.getValue(), second.getValue());
+            Map<T, Dependency> relatedVertices = dependencyProvider.getAllRelated(first.getValue(), allT);
+            for (Entry<T, Dependency> entry : relatedVertices.entrySet()) {
+                T secondT = entry.getKey();
+                Vertex<T> second = tToVertexMap.get(secondT);
+
+                Dependency dependency = entry.getValue();
                 if (dependency == Dependency.STRONG) {
                     first.addDependency(second);
                 } else if (dependency == Dependency.WEAK) {
@@ -176,6 +183,7 @@ public class TopologicalSorter {
         STRONG
     }
 
+    @FunctionalInterface
     public interface DependencyProvider<T> {
         /**
          * Provides dependency information for two values.

@@ -1,5 +1,8 @@
 package org.quiltmc.chasm.transformer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.quiltmc.chasm.tree.Node;
 
 public interface Target {
@@ -22,4 +25,35 @@ public interface Target {
     boolean overlaps(Target other);
 
     Node resolve(Node root);
+
+    default NodePath getPath() {
+        class RecordingNode implements Node {
+            List<Object> path = new ArrayList<>();
+
+            @Override
+            public void initializePath(NodePath nodePath) {
+                this.path.clear();
+                nodePath.resolve(this);
+            }
+
+            @Override
+            public NodePath getPath() {
+                return NodePath.fromList(path);
+            }
+
+            @Override
+            public Node toImmutable() {
+                return null;
+            }
+
+            @Override
+            public boolean isImmutable() {
+                return false;
+            }
+        }
+        RecordingNode recording = new RecordingNode();
+        this.resolve(recording);
+        return recording.getPath();
+    }
+    Target span(Target other);
 }
