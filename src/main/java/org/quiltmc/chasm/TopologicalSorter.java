@@ -2,8 +2,10 @@ package org.quiltmc.chasm;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
@@ -185,6 +187,20 @@ public class TopologicalSorter {
          * @return How first depends on second
          */
         Dependency get(T first, T second);
+
+        default Map<T, Dependency> getAllRelated(T first, Set<T> allT) {
+            Map<T, Dependency> allRelated = new HashMap<>(allT.size());
+            for (T second : allT) {
+                if (second == first) {
+                    continue;
+                }
+                Dependency relation = get(first, second);
+                if (relation != Dependency.NONE) {
+                    allRelated.put(second, relation);
+                }
+            }
+            return allRelated;
+        }
     }
 
     private static class Vertex<T> {
