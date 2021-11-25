@@ -4,26 +4,43 @@ plugins {
     id 'checkstyle'
 }
 
-group 'org.example'
+group 'org.quiltmc'
 version '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
+sourceSets {
+    testData {
+        java {
+            srcDirs file("src/testData/java")
+            compileClasspath = sourceSets.main.output + configurations.testCompileClasspath
+            runtimeClasspath = sourceSets.main.output + project.configurations.testRuntimeClasspath
+        }
+    }
 }
+
+compileJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+compileTestJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+compileTestDataJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    destinationDirectory.dir("src/testData/classes")
+}
+
+testClasses.dependsOn("testDataClasses")
 
 checkstyle {
     toolVersion "9.1"
     ignoreFailures(false)
-}
-
-compileJava {
-    sourceCompatibility = 16
-    targetCompatibility = 16
-}
-
-compileTestJava {
-    sourceCompatibility = 17
-    targetCompatibility = 17
 }
 
 generateGrammarSource {
@@ -31,9 +48,15 @@ generateGrammarSource {
     arguments += ["-visitor", "-long-messages"]
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation 'org.ow2.asm:asm:9.2'
     antlr 'org.antlr:antlr4:4.9.3'
+
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     testImplementation 'org.ow2.asm:asm-util:9.2'
