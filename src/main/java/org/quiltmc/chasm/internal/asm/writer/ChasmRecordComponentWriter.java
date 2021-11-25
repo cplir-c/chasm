@@ -18,32 +18,32 @@ public class ChasmRecordComponentWriter {
     }
 
     private void visitAttributes(RecordComponentVisitor componentVisitor) {
-        ListNode attributesListNode = (ListNode) componentNode.get(NodeConstants.ATTRIBUTES);
+        Node attributesListNode = componentNode.get(NodeConstants.ATTRIBUTES);
         if (attributesListNode == null) {
             return;
         }
-        for (Node n : attributesListNode) {
-            componentVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
+        for (Node n : attributesListNode.getAsListNode()) {
+            componentVisitor.visitAttribute((Attribute) n.getAsObject());
         }
     }
 
     private void visitAnnotations(RecordComponentVisitor componentVisitor) {
-        ListNode annotationsListNode = (ListNode) componentNode.get(NodeConstants.ANNOTATIONS);
+        Node annotationsListNode = componentNode.get(NodeConstants.ANNOTATIONS);
         if (annotationsListNode == null) {
             return;
         }
-        for (Node n : annotationsListNode) {
+        for (Node n : annotationsListNode.getAsListNode()) {
             ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
             writer.visitAnnotation(componentVisitor::visitAnnotation, componentVisitor::visitTypeAnnotation);
         }
     }
 
     public void visitRecordComponent(ClassVisitor visitor) {
-        String name = ((ValueNode<String>) componentNode.get(NodeConstants.NAME)).getValue();
-        String descriptor = ((ValueNode<String>) componentNode.get(NodeConstants.DESCRIPTOR)).getValue();
+        String name = componentNode.get(NodeConstants.NAME).getAsString();
+        String descriptor = componentNode.get(NodeConstants.DESCRIPTOR).getAsString();
 
-        ValueNode<String> signatureNode = (ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null ? null : signatureNode.getValue();
+        Node signatureNode = componentNode.get(NodeConstants.SIGNATURE);
+        String signature = signatureNode == null ? null : signatureNode.getAsString();
 
         RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);
 

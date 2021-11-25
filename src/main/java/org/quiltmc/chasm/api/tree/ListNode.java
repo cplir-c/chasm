@@ -5,4 +5,9 @@ import java.util.List;
 public interface ListNode extends Node, List<Node> {
     @Override
     ListNode copy();
+
+    @Override
+    default ListNode getAsListNode() {
+        return this;
+    }
 }

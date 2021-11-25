@@ -8,7 +8,6 @@ import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
-@SuppressWarnings("unchecked")
 public class ChasmAnnotationWriter {
     private final Node annotationNode;
 
@@ -16,44 +15,43 @@ public class ChasmAnnotationWriter {
         this.annotationNode = annotationNode;
     }
 
-    @SuppressWarnings("ConstantConditions")
     public void visitAnnotation(AnnotationVisitor visitor) {
-        ListNode values;
+        Node values;
         if (annotationNode instanceof MapNode) {
-            values = (ListNode) ((MapNode) annotationNode).get(NodeConstants.VALUES);
+            values = annotationNode.getAsMapNode().get(NodeConstants.VALUES);
         } else {
-            values = (ListNode) annotationNode;
+            values = annotationNode;
         }
         if (values == null) {
             visitor.visitEnd();
             return;
         }
 
-        for (Node value : values) {
+        for (Node value : values.getAsListNode()) {
             String name = null;
             if (value instanceof MapNode && ((MapNode) value).containsKey(NodeConstants.NAME)) {
                 MapNode mapNode = (MapNode) value;
                 // Name-value pairs
-                name = ((ValueNode<String>) mapNode.get(NodeConstants.NAME)).getValue();
+                name = mapNode.get(NodeConstants.NAME).getAsString();
                 value = mapNode.get(NodeConstants.VALUE);
             }
 
             if (value instanceof ValueNode) {
-                visitor.visit(name, ((ValueNode<Object>) value).getValue());
+                visitor.visit(name, value.getAsObject());
             } else if (value instanceof ListNode) {
                 AnnotationVisitor arrayVisitor = visitor.visitArray(name);
 
                 new ChasmAnnotationWriter(value).visitAnnotation(arrayVisitor);
             } else {
-                MapNode mapNode = (MapNode) value;
+                MapNode mapNode = value.getAsMapNode();
                 if (mapNode.containsKey(NodeConstants.VALUE)) {
-                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
-                    String enumValue = ((ValueNode<String>) mapNode.get(NodeConstants.VALUE)).getValue();
+                    String descriptor = mapNode.get(NodeConstants.DESCRIPTOR).getAsString();
+                    String enumValue = mapNode.get(NodeConstants.VALUE).getAsString();
 
                     visitor.visitEnum(name, descriptor, enumValue);
                 } else {
-                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
-                    ListNode annotationValues = (ListNode) mapNode.get(NodeConstants.VALUES);
+                    String descriptor = mapNode.get(NodeConstants.DESCRIPTOR).getAsString();
+                    ListNode annotationValues = mapNode.get(NodeConstants.VALUES).getAsListNode();
 
                     AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
                     new ChasmAnnotationWriter(annotationValues).visitAnnotation(annotationVisitor);
@@ -65,17 +63,16 @@ public class ChasmAnnotationWriter {
     }
 
     public void visitAnnotation(VisitAnnotation visitAnnotation, VisitTypeAnnotation visitTypeAnnotation) {
-        ValueNode<String> annotationDesc = (ValueNode<String>) ((MapNode) annotationNode).get(NodeConstants.DESCRIPTOR);
-        ValueNode<Boolean> visible = (ValueNode<Boolean>) ((MapNode) annotationNode).get(NodeConstants.VISIBLE);
-        ValueNode<Integer> typeRef = (ValueNode<Integer>) ((MapNode) annotationNode).get(NodeConstants.TYPE_REF);
-        ValueNode<String> typePath = (ValueNode<String>) ((MapNode) annotationNode).get(NodeConstants.TYPE_PATH);
+        String annotationDesc = annotationNode.getAsMapNode().get(NodeConstants.DESCRIPTOR).getAsString();
+        boolean visible = annotationNode.getAsMapNode().get(NodeConstants.VISIBLE).getAsBoolean();
+        Node typeRef = annotationNode.getAsMapNode().get(NodeConstants.TYPE_REF);
+        Node typePath = annotationNode.getAsMapNode().get(NodeConstants.TYPE_PATH);
         AnnotationVisitor annotationVisitor;
         if (typeRef == null) {
-            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValue(), visible.getValue());
+            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc, visible);
         } else {
-            annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getValue(),
-                    TypePath.fromString(typePath.getValue()), annotationDesc.getValue(),
-                    visible.getValue());
+            annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getAsInt(),
+                    TypePath.fromString(typePath.getAsString()), annotationDesc, visible);
         }
         visitAnnotation(annotationVisitor);
     }

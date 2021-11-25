@@ -26,4 +26,30 @@ public class ValueNode<T> implements Node {
     public MetadataProvider getMetadata() {
         return metadataProvider;
     }
+
+    @Override
+    public String getAsString() {
+        return (String) value;
+    }
+
+    @Override
+    public int getAsInt() {
+        return (Integer) value;
+    }
+
+    @Override
+    public boolean getAsBoolean() {
+        return (Boolean) value;
+    }
+
+    @Override
+    public Object getAsObject() {
+        return this.getValue();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ValueNode<Object> getAsValueNode() {
+        return (ValueNode<Object>) this;
+    }
 }

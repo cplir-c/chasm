@@ -17,10 +17,10 @@ public class ChasmModuleWriter {
     }
 
     public void visitModule(ClassVisitor visitor) {
-        String name = ((ValueNode<String>) moduleNode.get(NodeConstants.NAME)).getValue();
-        int access = ((ValueNode<Integer>) moduleNode.get(NodeConstants.ACCESS)).getValue();
-        ValueNode<String> versionNode = (ValueNode<String>) moduleNode.get(NodeConstants.VERSION);
-        String version = versionNode == null ? null : versionNode.getValue();
+        String name = moduleNode.get(NodeConstants.NAME).getAsString();
+        int access = moduleNode.get(NodeConstants.ACCESS).getAsInt();
+        Node versionNode = moduleNode.get(NodeConstants.VERSION);
+        String version = versionNode == null ? null : versionNode.getAsString();
 
         ModuleVisitor moduleVisitor = visitor.visitModule(name, access, version);
 
@@ -51,52 +51,52 @@ public class ChasmModuleWriter {
 
     private void visitMainClass(ModuleVisitor moduleVisitor) {
         if (moduleNode.containsKey(NodeConstants.MAIN)) {
-            moduleVisitor.visitMainClass(((ValueNode<String>) moduleNode.get(NodeConstants.MAIN)).getValue());
+            moduleVisitor.visitMainClass(moduleNode.get(NodeConstants.MAIN).getAsString());
         }
     }
 
     private void visitPackages(ModuleVisitor moduleVisitor) {
         // https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.26
-        ListNode packagesListNode = (ListNode) moduleNode.get(NodeConstants.PACKAGES);
+        Node packagesListNode = moduleNode.get(NodeConstants.PACKAGES);
         if (packagesListNode == null) {
             return;
         }
-        for (Node n : packagesListNode) {
-            moduleVisitor.visitPackage(((ValueNode<String>) n).getValue());
+        for (Node n : packagesListNode.getAsListNode()) {
+            moduleVisitor.visitPackage(n.getAsString());
         }
     }
 
     private void visitRequires(ModuleVisitor moduleVisitor) {
-        ListNode moduleRequiresListNode = (ListNode) moduleNode.get(NodeConstants.REQUIRES);
+        Node moduleRequiresListNode = moduleNode.get(NodeConstants.REQUIRES);
         if (moduleRequiresListNode == null) {
             return;
         }
-        for (Node n : moduleRequiresListNode) {
+        for (Node n : moduleRequiresListNode.getAsListNode()) {
             MapNode requireNode = (MapNode) n;
-            String reqModule = ((ValueNode<String>) requireNode.get(NodeConstants.MODULE)).getValue();
-            int reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
+            String reqModule = requireNode.get(NodeConstants.MODULE).getAsString();
+            int reqAccess = requireNode.get(NodeConstants.ACCESS).getAsInt();
 
-            ValueNode<String> versionNode = (ValueNode<String>) requireNode.get(NodeConstants.VERSION);
-            String reqVersion = versionNode == null ? null : versionNode.getValue();
+            Node versionNode = requireNode.get(NodeConstants.VERSION);
+            String reqVersion = versionNode == null ? null : versionNode.getAsString();
             moduleVisitor.visitRequire(reqModule, reqAccess, reqVersion);
         }
     }
 
     private void visitExports(ModuleVisitor moduleVisitor) {
-        ListNode moduleExportsListNode = (ListNode) moduleNode.get(NodeConstants.EXPORTS);
+        Node moduleExportsListNode = moduleNode.get(NodeConstants.EXPORTS);
         if (moduleExportsListNode == null) {
             return;
         }
-        for (Node n : moduleExportsListNode) {
-            MapNode exportNode = (MapNode) n;
-            String expPackage = ((ValueNode<String>) exportNode.get(NodeConstants.PACKAGE)).getValue();
-            Integer expAcccess = ((ValueNode<Integer>) exportNode.get(NodeConstants.ACCESS)).getValue();
-            ListNode reqModules = ((ListNode) exportNode.get(NodeConstants.MODULES));
+        for (Node n : moduleExportsListNode.getAsListNode()) {
+            MapNode exportNode = n.getAsMapNode();
+            String expPackage = exportNode.get(NodeConstants.PACKAGE).getAsString();
+            int expAcccess = exportNode.get(NodeConstants.ACCESS).getAsInt();
+            ListNode reqModules = (ListNode) exportNode.get(NodeConstants.MODULES);
             String[] modules = null;
             if (reqModules != null) {
                 modules = new String[reqModules.size()];
                 for (int i = 0; i < reqModules.size(); i++) {
-                    modules[i] = ((ValueNode<String>) reqModules.get(i)).getValue();
+                    modules[i] = reqModules.get(i).getAsString();
                 }
             }
             moduleVisitor.visitExport(expPackage, expAcccess, modules);
@@ -104,21 +104,20 @@ public class ChasmModuleWriter {
     }
 
     private void visitOpens(ModuleVisitor moduleVisitor) {
-        ListNode moduleOpensListNode = (ListNode) moduleNode.get(NodeConstants.OPENS);
+        Node moduleOpensListNode = moduleNode.get(NodeConstants.OPENS);
         if (moduleOpensListNode == null) {
             return;
         }
-        for (Node n : moduleOpensListNode) {
-            MapNode openNode = (MapNode) n;
-            String openPackage = ((ValueNode<String>) openNode.get(NodeConstants.PACKAGE)).getValue();
-            Integer openAccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
-
-            ListNode openModules = ((ListNode) openNode.get(NodeConstants.MODULES));
+        for (Node n : moduleOpensListNode.getAsListNode()) {
+            MapNode openNode = n.getAsMapNode();
+            String openPackage = openNode.get(NodeConstants.PACKAGE).getAsString();
+            int openAccess = openNode.get(NodeConstants.ACCESS).getAsInt();
+            ListNode openModules = (ListNode) openNode.get(NodeConstants.MODULES);
             String[] modules = null;
             if (openModules != null) {
                 modules = new String[openModules.size()];
                 for (int i = 0; i < openModules.size(); i++) {
-                    modules[i] = ((ValueNode<String>) openModules.get(i)).getValue();
+                    modules[i] = openModules.get(i).getAsString();
                 }
             }
 
@@ -127,27 +126,27 @@ public class ChasmModuleWriter {
     }
 
     private void visitUses(ModuleVisitor moduleVisitor) {
-        ListNode moduleUsesListNode = (ListNode) moduleNode.get(NodeConstants.USES);
+        Node moduleUsesListNode = moduleNode.get(NodeConstants.USES);
         if (moduleUsesListNode == null) {
             return;
         }
-        for (Node n : moduleUsesListNode) {
-            moduleVisitor.visitUse(((ValueNode<String>) n).getValue());
+        for (Node n : moduleUsesListNode.getAsListNode()) {
+            moduleVisitor.visitUse(n.getAsString());
         }
     }
 
     private void visitProvides(ModuleVisitor moduleVisitor) {
-        ListNode moduleProvidesListNode = (ListNode) moduleNode.get(NodeConstants.PROVIDES);
+        Node moduleProvidesListNode = moduleNode.get(NodeConstants.PROVIDES);
         if (moduleProvidesListNode == null) {
             return;
         }
-        for (Node n : moduleProvidesListNode) {
+        for (Node n : moduleProvidesListNode.getAsListNode()) {
             MapNode providesNode = (MapNode) n;
-            String service = ((ValueNode<String>) providesNode.get(NodeConstants.SERVICE)).getValue();
+            String service = providesNode.get(NodeConstants.SERVICE).getAsString();
             ListNode providers = (ListNode) providesNode.get(NodeConstants.PROVIDERS);
             String[] prov = new String[providers.size()];
             for (int i = 0; i < providers.size(); i++) {
-                prov[i] = ((ValueNode<String>) providers.get(i)).getValue();
+                prov[i] = providers.get(i).getAsString();
             }
             moduleVisitor.visitProvide(service, prov);
         }
