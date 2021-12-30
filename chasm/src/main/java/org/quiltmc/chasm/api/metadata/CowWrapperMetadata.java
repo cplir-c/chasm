@@ -7,18 +7,20 @@ import org.quiltmc.chasm.internal.cow.AbstractChildCowWrapper;
 import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 
 /**
- * @param <T>
+ * @param <I> Interface type
+ * @param <C> CowWrapper type
+ * @param <T> Type (the real type of the implementing class)
  *
  */
-public abstract class CowWrapperMetadata<T extends Metadata>
-        extends AbstractChildCowWrapper<T, CowWrapperMetadata<T>, CowWrapperMetadataProvider>
-        implements Metadata {
+public abstract class CowWrapperMetadata<I extends Metadata<I, C, ? extends I>, C extends CowWrapperMetadata<I, C, T> & Metadata<I, C, C>, T extends Metadata<I, C, T>>
+        extends AbstractChildCowWrapper<T, C, CowWrapperMetadataProvider>
+        implements Metadata<I, C, C> {
 
     /**
      * @param object
      * @param owned
      */
-    protected <M extends Metadata> CowWrapperMetadata(CowWrapperMetadataProvider parent, Class<M> key, T object,
+    protected CowWrapperMetadata(CowWrapperMetadataProvider parent, Class<I> key, T object,
             boolean owned) {
         super(parent, key, object, owned);
     }
@@ -26,17 +28,15 @@ public abstract class CowWrapperMetadata<T extends Metadata>
     /**
      * @param other
      */
-    protected CowWrapperMetadata(CowWrapperMetadata<T> other) {
+    protected CowWrapperMetadata(CowWrapperMetadata<I, C, T> other) {
         super(other);
     }
 
     @Override
-    protected CowWrapperMetadata<T> castThis() {
-        return this;
-    }
+    protected abstract C castThis();
 
     @Override
-    public abstract CowWrapperMetadata<T> deepCopy();
+    public abstract C deepCopy();
 
     @Override
     protected void updateThisWrapper(Object key, UpdatableCowWrapper child, Object contents) {
@@ -44,6 +44,6 @@ public abstract class CowWrapperMetadata<T extends Metadata>
     }
 
     @Override
-    public abstract <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned);
+    public abstract C asWrapper(CowWrapperMetadataProvider parent, Class<I> key, boolean owned);
 
 }

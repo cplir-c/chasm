@@ -3,12 +3,13 @@
  */
 package org.quiltmc.chasm.api.metadata;
 
+import org.quiltmc.chasm.api.util.CowWrapper;
 import org.quiltmc.chasm.internal.cow.Copyable;
 
 /**
  *
  */
-public interface MetadataProvider extends Copyable {
+public interface MetadataProvider<P extends MetadataProvider<P>> extends Copyable {
 
     /**
      * Attach {@link Metadata} of a given type.
@@ -17,7 +18,8 @@ public interface MetadataProvider extends Copyable {
      * @param data The instance of the specified type to attach.
      * @param <T> The type of the metadata.
      */
-    <T extends Metadata> void put(Class<T> dataClass, T data);
+    <I extends Metadata<I, C, ? extends I>, C extends Metadata<I, C, C> & CowWrapper, T extends Metadata<I, C, T>> void put(
+            Class<I> dataClass, T data);
 
     /**
      * Retrieves {@link Metadata} of a given type.
@@ -26,7 +28,8 @@ public interface MetadataProvider extends Copyable {
      * @param <T> The type of the metadata.
      * @return The attached metadata of the specified type, or {@code null} if it doesn't exist.
      */
-    <T extends Metadata> T get(Class<T> dataClass);
+    <I extends Metadata<I, C, ? extends I>, C extends Metadata<I, C, C> & CowWrapper> I get(
+            Class<I> dataClass);
 
     /**
      * Creates a deep copy of this {@link MetadataProvider}.
@@ -36,8 +39,9 @@ public interface MetadataProvider extends Copyable {
      * @return A deep copy of this instance.
      */
     @Override
-    MetadataProvider deepCopy();
+    P deepCopy();
 
     @Override
-    MetadataProvider shallowCopy();
+    P shallowCopy();
+
 }

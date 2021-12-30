@@ -12,23 +12,25 @@ import org.quiltmc.chasm.api.tree.Node;
 /**
  *
  */
-public interface PathMetadata extends Metadata, List<ListPathMetadata.Entry> {
+public interface PathMetadata<T extends PathMetadata<T>> extends
+        Metadata<PathMetadata<?>, CowWrapperPathMetadata, T>, List<ListPathMetadata.Entry> {
+    @SuppressWarnings("unchecked")
+    Class<PathMetadata<?>> PATH_METADATA_CLASS = (Class<PathMetadata<?>>) (Class<?>) PathMetadata.class;
 
     @Override
-    PathMetadata deepCopy();
+    T deepCopy();
 
-    PathMetadata append(String name);
+    T append(String name);
 
-    PathMetadata append(int index);
+    T append(int index);
 
-    PathMetadata parent();
+    T parent();
 
-    boolean startsWith(PathMetadata other);
+    <P extends PathMetadata<P>> boolean startsWith(P other);
 
     Node resolve(Node root);
 
     @Override
-    <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key,
-            boolean owned);
+    CowWrapperPathMetadata asWrapper(CowWrapperMetadataProvider parent, Class<PathMetadata<?>> key, boolean owned);
 
 }

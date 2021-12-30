@@ -5,7 +5,7 @@ import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.internal.cow.ImmutableCowWrapper;
 
-public class OriginMetadata implements Metadata, ImmutableCowWrapper {
+public class OriginMetadata implements Metadata<OriginMetadata, OriginMetadata, OriginMetadata>, ImmutableCowWrapper {
     private final String transformerId;
 
     public OriginMetadata(Transformation origin) {
@@ -29,7 +29,7 @@ public class OriginMetadata implements Metadata, ImmutableCowWrapper {
     }
 
     @Override
-    public <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned) {
-        return key.cast(this);
+    public OriginMetadata asWrapper(CowWrapperMetadataProvider parent, Class<OriginMetadata> key, boolean owned) {
+        return this;
     }
 }

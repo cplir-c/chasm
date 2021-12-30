@@ -3,14 +3,15 @@
  */
 package org.quiltmc.chasm.internal.cow;
 
+/**
+ * @param <T> Type: the type of the contained object
+ * @param <W> Wrapper: the type of the wrapper that implements this class
+ * @param <P> Parent: the type of possible parents of the wrapper
+ */
 public abstract class AbstractChildCowWrapper<T extends Copyable, W extends AbstractChildCowWrapper<T, W, P>, P extends UpdatableCowWrapper>
         extends AbstractCowWrapper<T, W> {
     private P parent;
     private Object key;
-
-    public enum SentinelKeys {
-        METADATA;
-    }
 
     /**
      * @param other

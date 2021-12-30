@@ -17,22 +17,24 @@ import org.quiltmc.chasm.internal.metadata.ListPathMetadata.Entry;
 /**
  *
  */
-public class CowWrapperPathMetadata extends CowWrapperMetadata<ListPathMetadata>
-        implements PathMetadata, MixinRandomAccessListImpl<Entry> {
+public class CowWrapperPathMetadata
+        extends CowWrapperMetadata<PathMetadata<?>, CowWrapperPathMetadata, ListPathMetadata>
+        implements PathMetadata<CowWrapperPathMetadata>, MixinRandomAccessListImpl<Entry> {
 
     /**
      * @param parent
      * @param object
      * @param owned
      */
+    @SuppressWarnings("unchecked")
     public CowWrapperPathMetadata(CowWrapperMetadataProvider parent, ListPathMetadata object, boolean owned) {
-        super(parent, PathMetadata.class, object, owned);
+        super(parent, PathMetadata.PATH_METADATA_CLASS, object, owned);
     }
 
     /**
      * @param other
      */
-    public CowWrapperPathMetadata(CowWrapperMetadata<ListPathMetadata> other) {
+    public CowWrapperPathMetadata(CowWrapperPathMetadata other) {
         super(other);
     }
 
@@ -205,11 +207,12 @@ public class CowWrapperPathMetadata extends CowWrapperMetadata<ListPathMetadata>
     }
 
     @Override
-    public <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned) {
-        if (key != PathMetadata.class) {
+    public CowWrapperPathMetadata asWrapper(CowWrapperMetadataProvider parent, Class<PathMetadata<?>> key,
+            boolean owned) {
+        if (key != PathMetadata.PATH_METADATA_CLASS) {
             throw new IllegalArgumentException("Illegal agument" + key);
         }
-        return key.cast(new CowWrapperPathMetadata(parent, this.object, owned));
+        return new CowWrapperPathMetadata(parent, this.object, owned);
     }
 
 }

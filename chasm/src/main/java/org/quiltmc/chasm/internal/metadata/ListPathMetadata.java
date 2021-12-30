@@ -4,22 +4,21 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
-import org.quiltmc.chasm.api.metadata.CowWrapperMetadata;
-import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 
-public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry> implements PathMetadata {
+public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry>
+        implements PathMetadata<ListPathMetadata> {
     public ListPathMetadata() {
     }
 
-    public ListPathMetadata(PathMetadata entries) {
+    public <L extends PathMetadata<L>> ListPathMetadata(L entries) {
         super(entries);
     }
 
     @Override
-    public PathMetadata deepCopy() {
+    public ListPathMetadata deepCopy() {
         // No need to copy entries because they're immutable
         return new ListPathMetadata(this);
     }
@@ -29,31 +28,31 @@ public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry> implemen
         return new ListPathMetadata(this);
     }
 
-    private PathMetadata append(Entry entry) {
+    private ListPathMetadata append(Entry entry) {
         ListPathMetadata path = new ListPathMetadata(this);
         path.add(entry);
         return path;
     }
 
     @Override
-    public PathMetadata append(String name) {
+    public ListPathMetadata append(String name) {
         return append(new Entry(name));
     }
 
     @Override
-    public PathMetadata append(int index) {
+    public ListPathMetadata append(int index) {
         return append(new Entry(index));
     }
 
     @Override
-    public PathMetadata parent() {
-        PathMetadata path = new ListPathMetadata(this);
+    public ListPathMetadata parent() {
+        ListPathMetadata path = new ListPathMetadata(this);
         path.remove(path.size() - 1);
         return path;
     }
 
     @Override
-    public boolean startsWith(PathMetadata other) {
+    public <T extends PathMetadata<T>> boolean startsWith(T other) {
         if (other.size() > this.size()) {
             return false;
         }
@@ -134,9 +133,10 @@ public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry> implemen
     }
 
     @Override
-    public <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned) {
-        CowWrapperMetadata<ListPathMetadata> wrapper = new CowWrapperPathMetadata(parent, this, owned);
+    public CowWrapperPathMetadata asWrapper(CowWrapperMetadataProvider parent,
+            Class<PathMetadata<ListPathMetadata>> key, boolean owned) {
+        CowWrapperPathMetadata wrapper = new CowWrapperPathMetadata(parent, this, owned);
         wrapper.toOwned(owned);
-        return key.cast(wrapper);
+        return wrapper;
     }
 }

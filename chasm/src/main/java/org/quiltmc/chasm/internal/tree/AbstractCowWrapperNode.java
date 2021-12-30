@@ -52,7 +52,7 @@ public abstract class AbstractCowWrapperNode<N extends Node, W extends AbstractC
 
     @Override
     protected void updateThisWrapper(Object objKey, UpdatableCowWrapper cowChild, Object objectContents) {
-        if (objKey == AbstractChildCowWrapper.SentinelKeys.METADATA) {
+        if (objKey == CowWrapperNode.SentinelKeys.METADATA) {
             if (!(cowChild instanceof CowWrapperMetadataProvider) || !(objectContents instanceof MetadataProvider)) {
                 throw new IllegalArgumentException("Wrong metadata update typing.");
             }

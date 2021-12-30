@@ -10,4 +10,8 @@ import org.quiltmc.chasm.api.util.CowWrapper;
  */
 public interface CowWrapperNode extends CowWrapper, Node {
 
+    enum SentinelKeys {
+        METADATA;
+    }
+
 }

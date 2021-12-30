@@ -44,5 +44,4 @@ public interface ImmutableCowWrapper extends CowWrapper {
     default boolean wrapsObject(Object o) {
         return o == this;
     }
-
 }
